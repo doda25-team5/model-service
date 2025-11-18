@@ -31,12 +31,18 @@ jobs:
           python src/read_data.py
           python src/text_preprocessing.py
           python src/text_classification.py
-
+      - name: Prepare artifact folder
+        run: |
+          mkdir -p artifact_bundle
+          cp -r output artifact_bundle/
+          cp src/serve_model.py artifact_bundle/
+          cp requirements.txt artifact_bundle/
       - name: Upload trained model
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
-          path: ./output
+          path: artifact_bundle
+
 
   build:
     name: Build & Push Multi-Arch Image
@@ -51,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: trained-model
-          path: ./output
+          path: artifact_bundle
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
