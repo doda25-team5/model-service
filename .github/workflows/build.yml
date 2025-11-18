@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
+
       - name: Create output directory
         run: mkdir -p output
 
@@ -36,8 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
-          path: models/model.pkl
-
+          path: output/.joblib
 
   build:
     name: Build & Push Multi-Arch Image
@@ -52,7 +51,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: trained-model
-          path: models/
+          path: output/
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
