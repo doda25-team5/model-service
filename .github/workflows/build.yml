@@ -3,11 +3,6 @@ name: Train and Build Multi-Arch Image
 on:
   push:
     branches: ["f4"]
-    paths:
-      - "src/**"
-      - "models/**"
-      - "requirements.txt"
-      - "Dockerfile"
   workflow_dispatch:
 
 jobs:
