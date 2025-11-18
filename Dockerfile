@@ -4,4 +4,4 @@ WORKDIR /root/sms
 COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8081
-CMD ["python", "./artifact_bundle/serve_model.py"]
+CMD ["python", "./src/serve_model.py"]
