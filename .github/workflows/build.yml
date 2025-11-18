@@ -33,10 +33,7 @@ jobs:
           python src/text_classification.py
 
       - name: Upload trained model
-        uses: actions/upload-artifact@v4
-        with:
-          name: trained-model
-          path: output/.joblib
+        run: ls
 
   build:
     name: Build & Push Multi-Arch Image
