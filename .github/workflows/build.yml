@@ -1,10 +1,9 @@
-name: Build & Push Multi-Arch Image to GHCR
+name: Build and Push Multi-Arch Image to GHCR
 
 on:
   push:
     branches: ["f4"]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,7 +11,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      - name: Download trained model
+        uses: actions/download-artifact@v4
+        with:
+          name: trained-model
+          path: models/
+          
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 

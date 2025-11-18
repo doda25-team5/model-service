@@ -1,0 +1,29 @@
+name: Train Model
+on:
+  push:
+    paths:
+      - "src/**"
+      - "requirements.txt"
+
+jobs: 
+  train: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: install dependencies
+        run: pip install -r requirements.txt
+      - name: training pipeline
+        run: | 
+          python src/read_data.py
+          python src/text_preprocessing.py
+          python src/text_classification.py
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: models/model.pkl
