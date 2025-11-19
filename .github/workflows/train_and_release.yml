@@ -57,3 +57,14 @@ jobs:
           files: output/*.joblib
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create TEST GitHub Release on push (temporary)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: test-f9
+          name: "Test Release for F9"
+          files: output/*.joblib
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
