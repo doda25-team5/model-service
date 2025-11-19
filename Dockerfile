@@ -9,5 +9,8 @@ RUN mkdir -p output && \
     python src/text_preprocessing.py && \
     python src/text_classification.py
 
-EXPOSE 8081
+
+ENV SERVER_PORT=8081
+EXPOSE ${SERVER_PORT}
+
 CMD ["python", "src/serve_model.py"]
