@@ -1,9 +1,6 @@
 name: Train and Release Model
 
 on:
-  push:
-    branches:
-      - f9
   workflow_dispatch:
     inputs:
       release_tag:
@@ -49,7 +46,6 @@ jobs:
           path: output/*.joblib
 
       - name: Create GitHub Release and upload model
-        if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_tag }}
@@ -57,14 +53,3 @@ jobs:
           files: output/*.joblib
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create TEST GitHub Release on push (temporary)
-        if: github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: test-f9
-          name: "Test Release for F9"
-          files: output/*.joblib
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
