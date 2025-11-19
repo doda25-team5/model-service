@@ -1,11 +1,18 @@
 name: Train and Release Model
 
 on:
+
+  push:
+    branches:
+      - f9
   workflow_dispatch:
     inputs:
       release_tag:
         description: 'Release tag (e.g., v1.0.0)'
         required: true
+
+permissions:
+  contents: write
 
 jobs:
   train-and-release:
