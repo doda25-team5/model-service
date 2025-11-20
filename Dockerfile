@@ -17,8 +17,8 @@ COPY . .
 
 ENV MODEL_DIR=/root/sms/output
 ENV MODEL_FILENAME=model.joblib
-ENV MODEL_URL="https://github.com/doda25-team5/model-service/releases/download/test-f9/model.joblib"
-ENV PREPROCESSOR_URL="https://github.com/doda25-team5/model-service/releases/download/test-f9/preprocessor.joblib"
+ENV MODEL_URL=
+ENV PREPROCESSOR_URL=
 ENV MODEL_PORT=8081
 
 EXPOSE ${MODEL_PORT}
