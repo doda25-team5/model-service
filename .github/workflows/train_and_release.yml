@@ -6,6 +6,9 @@ on:
       release_tag:
         description: 'Release tag (e.g., v1.0.0)'
         required: true
+  push:
+    branches:
+      - f9
 
 permissions:
   contents: write
@@ -13,6 +16,7 @@ permissions:
 jobs:
   train-and-release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,11 +49,38 @@ jobs:
           name: model-artifacts
           path: output/*.joblib
 
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
       - name: Create GitHub Release and upload model
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.release_tag }}
-          name: Model Release ${{ github.event.inputs.release_tag }}
-          files: output/*.joblib
+        if: github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+
+          gh release create "$TAG" \
+            --title "Model Release $TAG" \
+            --notes "Automated model release for tag $TAG" \
+            || echo "Release $TAG already exists, continuing..."
+
+          gh release upload "$TAG" output/*.joblib --clobber
+
+      - name: Create TEST GitHub Release on push to f9
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+
+          TAG="test-f9-ghcli"
+
+          gh release create "$TAG" \
+            --title "Test Release for F9 (gh CLI)" \
+            --notes "Test release created from push to f9 using gh CLI" \
+            || echo "Release $TAG already exists, continuing..."
+
+          gh release upload "$TAG" output/*.joblib --clobber
