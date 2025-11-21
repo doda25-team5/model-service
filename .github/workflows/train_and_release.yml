@@ -13,6 +13,7 @@ permissions:
 jobs:
   train-and-release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,11 +46,19 @@ jobs:
           name: model-artifacts
           path: output/*.joblib
 
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
       - name: Create GitHub Release and upload model
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.release_tag }}
-          name: Model Release ${{ github.event.inputs.release_tag }}
-          files: output/*.joblib
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          gh release create "$TAG" \
+            --title "Model Release $TAG" \
+            --notes "Automated model release for tag $TAG" \
+            || echo "Release $TAG already exists, continuing..."
+
+          gh release upload "$TAG" output/*.joblib --clobber
