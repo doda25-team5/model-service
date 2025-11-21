@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: doda25-team5/model-service
+  IMAGE_NAME: doda25-team5/sms-backend
 
 jobs:
   release:
