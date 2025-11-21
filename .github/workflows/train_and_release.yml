@@ -6,9 +6,6 @@ on:
       release_tag:
         description: 'Release tag (e.g., v1.0.0)'
         required: true
-  push:
-    branches:
-      - f9
 
 permissions:
   contents: write
@@ -63,20 +60,6 @@ jobs:
           gh release create "$TAG" \
             --title "Model Release $TAG" \
             --notes "Automated model release for tag $TAG" \
-            || echo "Release $TAG already exists, continuing..."
-
-          gh release upload "$TAG" output/*.joblib --clobber
-
-      - name: Create TEST GitHub Release on push to f9
-        if: github.event_name == 'push'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="test-f9-ghcli"
-
-          gh release create "$TAG" \
-            --title "Test Release for F9 (gh CLI)" \
-            --notes "Test release created from push to f9 using gh CLI" \
             || echo "Release $TAG already exists, continuing..."
 
           gh release upload "$TAG" output/*.joblib --clobber
