@@ -3,11 +3,30 @@ import joblib
 import os 
 import requests 
 import time
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flasgger import Swagger
 import pandas as pd
 from text_preprocessing import prepare, _extract_message_len, _text_process
 
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
+# Count how many predictions are made
+PREDICTION_COUNTER = Counter(
+    "sms_predictions_total",
+    "Total number of predictions made by the SMS model",
+)
+
+# Measure model latency
+PREDICTION_LATENCY = Histogram(
+    "sms_prediction_latency_seconds",
+    "Time spent processing a prediction request",
+)
+
+# Gauge to expose current model file size (as an example)
+MODEL_SIZE_GAUGE = Gauge(
+    "sms_model_file_size_bytes",
+    "Size of the model file in bytes",
+)
 
 MODEL_DIR = os.getenv("MODEL_DIR", "/root/sms/output")
 MODEL_FILENAME = os.getenv("MODEL_FILENAME", "model.joblib")
@@ -57,14 +76,21 @@ def load_assets():
         asset_name="PREPROCESSOR"
     )
 
+
+
     # 3. Load both
     print("Loading model...")
     model = joblib.load(MODEL_PATH)
     print("Model loaded.")
 
+
+
     print("Loading preprocessor...")
     preprocessor = joblib.load(PREPROC_PATH)
     print("Preprocessor loaded.")
+
+    if os.path.exists(MODEL_PATH):
+        MODEL_SIZE_GAUGE.set(os.path.getsize(MODEL_PATH))
 
     return model, preprocessor
 
@@ -83,6 +109,7 @@ app = Flask(__name__)
 swagger = Swagger(app)
 
 @app.route('/predict', methods=['POST'])
+@PREDICTION_LATENCY.time()  
 def predict():
     """... (Swagger documentation remains the same) ..."""
     
@@ -96,6 +123,7 @@ def predict():
     
    
     prediction = GLOBAL_MODEL.predict(processed_sms)[0] 
+    PREDICTION_COUNTER.inc()
     
     res = {
         "result": prediction,
@@ -104,6 +132,11 @@ def predict():
     }
     print(res)
     return jsonify(res)
+
+@app.route('/metrics')
+def metrics():
+    """Expose Prometheus metrics"""
+    return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 if __name__ == '__main__':
     # using the dynamic port from the environment variable
