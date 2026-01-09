@@ -10,23 +10,13 @@ from text_preprocessing import prepare, _extract_message_len, _text_process
 
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
-# Count how many predictions are made
-PREDICTION_COUNTER = Counter(
-    "sms_predictions_total",
-    "Total number of predictions made by the SMS model",
-)
+MODEL_VERSION = os.getenv("MODEL_VERSION", "unknown")
 
-# Measure model latency
-PREDICTION_LATENCY = Histogram(
-    "sms_prediction_latency_seconds",
-    "Time spent processing a prediction request",
-)
+PREDICTION_COUNTER = Counter( "model_predictions_total", "Total predictions", ["version"])
 
-# Gauge to expose current model file size (as an example)
-MODEL_SIZE_GAUGE = Gauge(
-    "sms_model_file_size_bytes",
-    "Size of the model file in bytes",
-)
+PREDICTION_LATENCY = Histogram("model_prediction_latency_seconds", "Time spent processing a prediction request", ["version"])
+
+MODEL_SIZE_GAUGE = Gauge("model_file_size_bytes", "Size of the model file in bytes", ["version"])
 
 MODEL_DIR = os.getenv("MODEL_DIR", "/root/sms/output")
 MODEL_FILENAME = os.getenv("MODEL_FILENAME", "model.joblib")
@@ -62,27 +52,23 @@ def ensure_asset(path, url, asset_name):
     print(f"{asset_name} downloaded.")
 
 def load_assets():
-    # 1. Ensure model exists
+    # Ensure model exists
     ensure_asset(
         path=MODEL_PATH,
         url=MODEL_URL,
         asset_name="MODEL"
     )
 
-    # 2. Ensure preprocessor exists
+    # Ensure preprocessor exists
     ensure_asset(
         path=PREPROC_PATH,
         url=PREPROCESSOR_URL,
         asset_name="PREPROCESSOR"
     )
 
-
-
-    # 3. Load both
     print("Loading model...")
     model = joblib.load(MODEL_PATH)
     print("Model loaded.")
-
 
 
     print("Loading preprocessor...")
@@ -90,7 +76,7 @@ def load_assets():
     print("Preprocessor loaded.")
 
     if os.path.exists(MODEL_PATH):
-        MODEL_SIZE_GAUGE.set(os.path.getsize(MODEL_PATH))
+        MODEL_SIZE_GAUGE.labels(version=MODEL_VERSION).set(os.path.getsize(MODEL_PATH))
 
     return model, preprocessor
 
@@ -109,29 +95,27 @@ app = Flask(__name__)
 swagger = Swagger(app)
 
 @app.route('/predict', methods=['POST'])
-@PREDICTION_LATENCY.time()  
 def predict():
     """... (Swagger documentation remains the same) ..."""
     
-
     if GLOBAL_MODEL is None:
         return jsonify({"error": "Model failed to load during startup."}), 503
 
-    input_data = request.get_json()
-    sms = input_data.get('sms')
-    processed_sms = GLOBAL_PREPROC.transform([sms])
+    with PREDICTION_LATENCY.labels(version=MODEL_VERSION).time():
+        input_data = request.get_json()
+        sms = input_data.get('sms')
+        processed_sms = GLOBAL_PREPROC.transform([sms])
     
-   
-    prediction = GLOBAL_MODEL.predict(processed_sms)[0] 
-    PREDICTION_COUNTER.inc()
+        prediction = GLOBAL_MODEL.predict(processed_sms)[0] 
+        PREDICTION_COUNTER.labels(version=MODEL_VERSION).inc()
     
-    res = {
-        "result": prediction,
-        "classifier": "decision tree",
-        "sms": sms
-    }
-    print(res)
-    return jsonify(res)
+        res = {
+            "result": prediction,
+            "classifier": "decision tree",
+            "sms": sms
+        }
+        print(res)
+        return jsonify(res)
 
 @app.route('/metrics')
 def metrics():
