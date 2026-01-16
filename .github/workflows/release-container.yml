@@ -20,12 +20,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract version from tag
+      - name: Extract version from version file
         id: version
         run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
+          VERSION=$(cat version)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
+          
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
