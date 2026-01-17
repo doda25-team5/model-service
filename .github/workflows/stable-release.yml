@@ -3,7 +3,7 @@ name: Stable Release (Model-Service Container)
 on:
   push:
     branches:
-      - modelservicetag
+      - main
 
 permissions:
   contents: write
@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: modelservicetag
+          ref: main
 
       - name: Configure Git user
         run: |
@@ -91,4 +91,4 @@ jobs:
         run: |
           git add version
           git commit -m "Bump version to ${NEXT_SNAPSHOT} [skip ci]"
-          git push origin modelservicetag --follow-tags
+          git push origin main --follow-tags

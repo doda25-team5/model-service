@@ -3,7 +3,7 @@ name: Pre-Release Model-Service Container
 on:
   push:
     branches-ignore:
-      - modelservicetag
+      - main
     tags-ignore:
       - "v*"
     paths-ignore:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Read base version from VERSION file
+      - name: Read base version from version file
         run: |
           VER=$(cat version)
           BASE=${VER%-SNAPSHOT}
