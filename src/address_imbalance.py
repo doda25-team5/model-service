@@ -74,6 +74,7 @@ def main():
     svm.fit(X_train, y_train)
     pred = svm.predict(X_test)
     
+    
     print('\n################# SVM #################\n')
     print(classification_report(y_test, pred))
     print('\n')
