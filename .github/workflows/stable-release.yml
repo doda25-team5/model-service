@@ -91,4 +91,4 @@ jobs:
         run: |
           git add version
           git commit -m "Bump version to ${NEXT_SNAPSHOT} [skip ci]"
-          git push origin main --follow-tags
+          git push origin modelservicetag --follow-tags
