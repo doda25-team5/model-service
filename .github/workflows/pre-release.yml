@@ -3,7 +3,7 @@ name: Pre-Release Model-Service Container
 on:
   push:
     branches-ignore:
-      - main
+      - modelservicetag
     tags-ignore:
       - "v*"
     paths-ignore:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Read base version from VERSION file
         run: |
-          VER=$(cat VERSION)
+          VER=$(cat version)
           BASE=${VER%-SNAPSHOT}
           echo "BASE=$BASE" >> $GITHUB_ENV
 
