@@ -54,6 +54,8 @@ jobs:
           git add version
           git commit -m "Release v$RELEASE_VERSION [skip ci]"
           git tag "v$RELEASE_VERSION"
+          git push origin HEAD
+          git push origin "v$RELEASE_VERSION"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
