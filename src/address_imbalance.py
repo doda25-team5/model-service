@@ -22,6 +22,7 @@ def Generate_balanced_dataset(messages):
     '''
     generate a more balanced dataset containing 1000 ham and 747 spam messages
     '''
+    
     ham_msg = messages[messages['label'] == 'ham'] # ham messages
     spam_msg = messages[messages['label'] == 'spam'] # spam messages
     
