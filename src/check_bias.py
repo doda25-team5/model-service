@@ -53,7 +53,7 @@ def main():
     
     messages = pd.read_csv("output/processed_msgs.csv")    
     messages2 = load_messages2() 
-    sms_data = pd.concat([messages, messages2]) # concatenate messages1 and messages2 to create a common tfidf feature vector
+    sms_data = pd.concat([messages, messages2]) # concatenate messages1 and messages2 to create a common tfidf feature vector.
     
     tfidf_vect = Tfidf_Vectorization(sms_data) # create a large sparse tfidf feature vector
 
